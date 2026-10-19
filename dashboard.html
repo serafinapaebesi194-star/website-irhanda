@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Business Intelligence | Universitas Timor</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+:root{--navy:#0B2A5B;--blue:#1E63C6;--orange:#F59E0B;--bg:#F1F5F9;--ink:#0F172A;--mute:#64748B;--line:#E2E8F0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+a{color:var(--blue)}
+header{background:var(--navy);color:#fff;padding:12px 6%;display:flex;justify-content:space-between;align-items:center;gap:14px;
+  flex-wrap:wrap;border-bottom:4px solid var(--orange);position:sticky;top:0;z-index:20}
+header b{font-size:17px}header small{display:block;color:#BCD0F2;font-size:12px}
+header nav{display:flex;gap:6px;flex-wrap:wrap}
+header nav a{color:#fff;text-decoration:none;font-size:13px;font-weight:600;padding:6px 11px;border-radius:8px;background:rgba(255,255,255,.1)}
+header nav a:hover{background:var(--orange);color:#1d1d1d}
+main{max-width:1200px;margin:auto;padding:28px 22px}
+h1{font-size:28px;color:var(--navy);margin-bottom:4px}
+h2{font-size:19px;color:var(--navy);margin-bottom:10px}
+.sub{color:var(--mute);font-size:14.5px;margin-bottom:22px;max-width:900px}
+section{scroll-margin-top:90px;margin-bottom:8px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(11,42,91,.04)}
+.grid{display:grid;gap:20px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.kpi-panel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:22px}
+.kpi-box{background:#fff;border-radius:14px;padding:16px 20px 16px 24px;border:1px solid var(--line);display:flex;flex-direction:column;
+  gap:12px;position:relative;overflow:hidden;min-width:0;box-shadow:0 4px 16px rgba(11,42,91,.04)}
+.kpi-box::before{content:"";position:absolute;top:0;left:0;width:5px;height:100%}
+.kpi-blue::before{background:#2563EB}.kpi-amber::before{background:#F59E0B}.kpi-emerald::before{background:#10B981}.kpi-purple::before{background:#8B5CF6}
+.kpi-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:#F8FAFC;border:1px solid var(--line)}
+.kpi-tag{font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--mute);font-weight:700;display:block}
+.kpi-val{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:6px;font-size:clamp(20px,1.7vw,26px);font-weight:800;margin:4px 0 2px;line-height:1.2}
+.kpi-val span:first-child{white-space:nowrap}.kpi-unit{font-size:13px;font-weight:600;color:var(--mute)}
+.kpi-sub{font-size:12px;color:#94A3B8}
+.tbl{border-collapse:collapse;width:100%;font-size:13px}
+.tbl th{background:var(--navy);color:#fff;text-align:left;padding:9px 12px;white-space:nowrap;cursor:pointer}
+.tbl td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl tr:nth-child(even) td{background:#F8FAFD}
+.scrollx{overflow-x:auto}.scroll{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.strat{border-left:5px solid var(--blue);background:#F8FAFD;padding:10px 14px;border-radius:8px;margin-bottom:10px;font-size:14px}
+.mut{color:var(--mute);font-size:13px}
+.btn{display:inline-block;background:var(--blue);color:#fff;border-radius:8px;padding:9px 16px;font-size:13.5px;text-decoration:none;font-weight:600;margin:4px 6px 4px 0}
+.btn.o{background:var(--orange);color:#1d1d1d}
+.note{background:#FFF6E5;border-left:4px solid var(--orange);padding:12px 16px;border-radius:8px;font-size:14px}
+ul.clean li{margin:6px 0 6px 18px}
+footer{background:var(--navy);color:#DCE8FA;text-align:center;padding:22px 12px;font-size:13px}
+@media(max-width:1100px){.kpi-panel{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:800px){.g2,.kpi-panel{grid-template-columns:1fr}header{position:static}}
+</style></head><body>
+<header>
+  <div><b>Dashboard Business Intelligence</b><small>Serafina Paebesi &middot; NPM 51230110 &middot; Universitas Timor</small></div>
+  <nav><a href="index.html">&larr; Beranda</a><a href="#ringkasan">Ringkasan</a><a href="#apriori">Apriori</a>
+  <a href="#kmeans">K-Means</a><a href="#rekomendasi">Rekomendasi</a><a href="#kualitas">Kualitas Data</a></nav>
+</header>
+<main>
+<section id="ringkasan">
+<h1>Ringkasan Penjualan Toko</h1>
+<p class="sub">Seluruh angka di halaman ini dihitung oleh Python (audit &rarr; preprocessing &rarr; Apriori &rarr; K-Means) dan disajikan sebagai halaman HTML statis. Dibuat pada 20-10-2026.</p>
+<div class="kpi-panel">
+  <div class="kpi-box kpi-blue"><div class="kpi-icon">💰</div><div><span class="kpi-tag">Total Omset Bersih</span><div class="kpi-val"><span>Rp 698.7 juta</span></div><div class="kpi-sub">Total penjualan setelah diskon</div></div></div>
+  <div class="kpi-box kpi-amber"><div class="kpi-icon">🧾</div><div><span class="kpi-tag">Jumlah Transaksi</span><div class="kpi-val"><span>6.000</span></div><div class="kpi-sub">Nota transaksi unik</div></div></div>
+  <div class="kpi-box kpi-emerald"><div class="kpi-icon">👥</div><div><span class="kpi-tag">Pelanggan Aktif</span><div class="kpi-val"><span>1.480</span></div><div class="kpi-sub">Pelanggan berbelanja</div></div></div>
+  <div class="kpi-box kpi-purple"><div class="kpi-icon">🛒</div><div><span class="kpi-tag">Rata-rata Basket Size</span><div class="kpi-val"><span>3,05</span><span class="kpi-unit">item / nota</span></div><div class="kpi-sub">Produk berbeda per struk</div></div></div>
+</div>
+<div class="grid g2">
+  <div class="card"><h2>📈 Tren Penjualan Bulanan</h2><div id="c_trend"></div></div>
+  <div class="card"><h2>🍰 Penjualan per Kategori</h2><div id="c_cat"></div></div>
+</div>
+<div class="card"><h2>🏆 10 Produk dengan Penjualan Tertinggi</h2><div id="c_top"></div></div>
+</section>
+
+<section id="apriori">
+<h1>Market Basket Analysis (Apriori)</h1>
+<p class="sub">Pasangan produk yang sering dibeli bersamaan. Parameter: min support 1,0%, min confidence 15% (Lift &gt; 1 berarti hubungan positif).</p>
+<div class="grid g2">
+  <div class="card"><h2>Top 10 Aturan Asosiasi</h2><div class="scrollx"><table class="dataframe tbl sortable">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Antecedent</th>
+      <th>Consequent</th>
+      <th>Support</th>
+      <th>Confidence</th>
+      <th>Lift</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Pulpen</td>
+      <td>Buku Tulis</td>
+      <td>4,05%</td>
+      <td>39,9%</td>
+      <td>3,20</td>
+    </tr>
+    <tr>
+      <td>Minyak Goreng 1L</td>
+      <td>Beras Premium 5kg</td>
+      <td>3,82%</td>
+      <td>35,7%</td>
+      <td>3,20</td>
+    </tr>
+    <tr>
+      <td>Mi Instan</td>
+      <td>Kopi Bubuk</td>
+      <td>2,38%</td>
+      <td>25,0%</td>
+      <td>2,43</td>
+    </tr>
+    <tr>
+      <td>Popok Bayi</td>
+      <td>Susu Formula</td>
+      <td>2,35%</td>
+      <td>24,7%</td>
+      <td>2,30</td>
+    </tr>
+    <tr>
+      <td>Pembersih Piring</td>
+      <td>Deterjen 1kg</td>
+      <td>2,27%</td>
+      <td>20,7%</td>
+      <td>2,25</td>
+    </tr>
+    <tr>
+      <td>Sabun Mandi</td>
+      <td>Sampo 170ml</td>
+      <td>2,17%</td>
+      <td>22,9%</td>
+      <td>2,16</td>
+    </tr>
+    <tr>
+      <td>Minyak Goreng 1L</td>
+      <td>Gula Pasir 1kg</td>
+      <td>2,92%</td>
+      <td>27,3%</td>
+      <td>2,15</td>
+    </tr>
+    <tr>
+      <td>Mi Instan</td>
+      <td>Air Mineral 600ml</td>
+      <td>2,10%</td>
+      <td>22,0%</td>
+      <td>2,13</td>
+    </tr>
+    <tr>
+      <td>Sabun Mandi</td>
+      <td>Pasta Gigi</td>
+      <td>2,20%</td>
+      <td>23,3%</td>
+      <td>2,13</td>
+    </tr>
+    <tr>
+      <td>Pewangi Pakaian</td>
+      <td>Deterjen 1kg</td>
+      <td>2,08%</td>
+      <td>19,5%</td>
+      <td>2,12</td>
+    </tr>
+  </tbody>
+</table></div></div>
+  <div class="card"><h2>Kekuatan Asosiasi (Lift)</h2><div id="c_lift"></div></div>
+</div>
+</section>
+
+<section id="kmeans">
+<h1>Segmentasi Pelanggan (K-Means + RFM)</h1>
+<p class="sub">Jumlah cluster k = 2 (pilihan otomatis berdasarkan Silhouette tertinggi: k = 2).</p>
+<div class="grid g2">
+  <div class="card"><h2>Kurva Elbow</h2><div id="c_elbow"></div></div>
+  <div class="card"><h2>Silhouette Score</h2><div id="c_sil"></div></div>
+</div>
+<div class="grid g2">
+  <div class="card"><h2>Komposisi Pelanggan per Segmen</h2><div id="c_donut"></div></div>
+  <div class="card"><h2>Kontribusi Nilai Belanja</h2><div id="c_contrib"></div></div>
+</div>
+<div class="card"><h2>Karakteristik Segmen (RFM)</h2><div class="scrollx"><table class="dataframe tbl sortable">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Segmen</th>
+      <th>Pelanggan</th>
+      <th>% Pelanggan</th>
+      <th>Avg Recency (hari)</th>
+      <th>Avg Frequency</th>
+      <th>Avg Monetary</th>
+      <th>% Nilai Belanja</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Bernilai Tinggi - Mulai Pasif (At Risk)</td>
+      <td>413</td>
+      <td>27,9%</td>
+      <td>152,3</td>
+      <td>2,05</td>
+      <td>Rp 197.250</td>
+      <td>11,7%</td>
+    </tr>
+    <tr>
+      <td>Loyal / Champions</td>
+      <td>1.067</td>
+      <td>72,1%</td>
+      <td>56,8</td>
+      <td>4,83</td>
+      <td>Rp 578.507</td>
+      <td>88,3%</td>
+    </tr>
+  </tbody>
+</table></div></div>
+<div class="card"><h2>Sebaran Pelanggan: Frequency vs Monetary</h2><div id="c_sc"></div></div>
+</section>
+
+<section id="rekomendasi">
+<h1>Rekomendasi Keputusan Bisnis</h1>
+<div class="grid g2">
+  <div class="card"><h2>Strategi per Segmen</h2><div class="strat" style="border-left-color:#F59E0B"><b>Bernilai Tinggi - Mulai Pasif (At Risk)</b> <span class="mut">(413 pelanggan &middot; 11,7% omset)</span><br><b>Fokus:</b> Reaktivasi cepat & prioritas<br><i>Kampanye personal 'Kami Rindu Anda' via WA/SMS dengan voucher khusus pada produk favorit sebelum churn permanen.</i></div><div class="strat" style="border-left-color:#1E63C6"><b>Loyal / Champions</b> <span class="mut">(1.067 pelanggan &middot; 88,3% omset)</span><br><b>Fokus:</b> Pertahankan dan apresiasi loyalitas<br><i>Program member eksklusif / poin ganda, akses awal promo, bundling produk premium, personalisasi layanan.</i></div></div>
+  <div class="card"><h2>Bundling &amp; Penataan Rak (Apriori)</h2><ul class="clean"><li><b>Bundling Pulpen + Buku Tulis</b> (Lift 3,20, Confidence 39,9%): tempatkan di rak berdampingan dan beri diskon paket hemat.</li><li><b>Bundling Minyak Goreng 1L + Beras Premium 5kg</b> (Lift 3,20, Confidence 35,7%): tempatkan di rak berdampingan dan beri diskon paket hemat.</li><li><b>Bundling Mi Instan + Kopi Bubuk</b> (Lift 2,43, Confidence 25,0%): tempatkan di rak berdampingan dan beri diskon paket hemat.</li><li><b>Bundling Popok Bayi + Susu Formula</b> (Lift 2,30, Confidence 24,7%): tempatkan di rak berdampingan dan beri diskon paket hemat.</li><li><b>Bundling Pembersih Piring + Deterjen 1kg</b> (Lift 2,25, Confidence 20,7%): tempatkan di rak berdampingan dan beri diskon paket hemat.</li></ul></div>
+</div>
+</section>
+
+<section id="kualitas">
+<h1>Kualitas Data &amp; Unduhan</h1>
+<div class="card"><h2>Perbandingan Sebelum vs Sesudah Cleaning</h2><div class="scrollx"><table class="dataframe tbl sortable">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Kondisi</th>
+      <th>Sebelum</th>
+      <th>Sesudah</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Jumlah baris</td>
+      <td>18.513</td>
+      <td>18.294</td>
+    </tr>
+    <tr>
+      <td>Transaksi unik</td>
+      <td>6.000</td>
+      <td>6.000</td>
+    </tr>
+    <tr>
+      <td>Pelanggan unik</td>
+      <td>1.480</td>
+      <td>1.480</td>
+    </tr>
+    <tr>
+      <td>Total missing value</td>
+      <td>237</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Baris duplikat</td>
+      <td>216</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Qty &lt;= 0 atau &gt; 20</td>
+      <td>37</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Total penjualan (Rp)</td>
+      <td>Rp 705.156.825</td>
+      <td>Rp 698.731.525</td>
+    </tr>
+  </tbody>
+</table></div></div>
+<div class="card"><h2>Log Preprocessing</h2><div class="scroll"><table class="dataframe tbl sortable">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Masalah</th>
+      <th>Keputusan dan alasan</th>
+      <th>Tindakan</th>
+      <th>Jumlah baris</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Teks tidak konsisten</td>
+      <td>Category dan Payment_Method: trim spasi + seragamkan kapital</td>
+      <td>diperbaiki</td>
+      <td>1.434</td>
+    </tr>
+    <tr>
+      <td>Duplikat penuh</td>
+      <td>Seluruh kolom identik: hapus, simpan 1</td>
+      <td>dihapus</td>
+      <td>217</td>
+    </tr>
+    <tr>
+      <td>Duplikat produk dalam 1 nota</td>
+      <td>Transaction_ID + Product_ID sama tetapi nilai lain beda: simpan baris pertama</td>
+      <td>dihapus</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>Missing Product_ID</td>
+      <td>Diisi dari Product_Name lewat katalog Data_Produk</td>
+      <td>diimputasi</td>
+      <td>26</td>
+    </tr>
+    <tr>
+      <td>Missing Customer_ID</td>
+      <td>Diisi dari baris lain pada Transaction_ID yang sama</td>
+      <td>diimputasi</td>
+      <td>28</td>
+    </tr>
+    <tr>
+      <td>Missing Region</td>
+      <td>Diisi dari Data_Pelanggan berdasarkan Customer_ID</td>
+      <td>diimputasi</td>
+      <td>33</td>
+    </tr>
+    <tr>
+      <td>Missing Customer_Type</td>
+      <td>Diisi dari Data_Pelanggan berdasarkan Customer_ID</td>
+      <td>diimputasi</td>
+      <td>34</td>
+    </tr>
+    <tr>
+      <td>Missing Payment_Method</td>
+      <td>Diisi dari baris lain pada nota yang sama; sisanya 'Tidak Diketahui'</td>
+      <td>diimputasi</td>
+      <td>37</td>
+    </tr>
+    <tr>
+      <td>Unit_Price tidak valid</td>
+      <td>NaN / &lt;= 0 / &gt; 3x harga katalog diganti harga katalog</td>
+      <td>diperbaiki</td>
+      <td>36</td>
+    </tr>
+    <tr>
+      <td>Quantity tidak valid</td>
+      <td>NaN / &lt;= 0 / &gt; 20: diturunkan dari Line_Total / (Harga x (1 - Diskon))</td>
+      <td>diperbaiki</td>
+      <td>70</td>
+    </tr>
+    <tr>
+      <td>Line_Total kosong / tidak konsisten</td>
+      <td>Dihitung ulang = Qty x Harga x (1 - Diskon)</td>
+      <td>dihitung ulang</td>
+      <td>28</td>
+    </tr>
+  </tbody>
+</table></div></div>
+<div class="card"><h2>Unduh Hasil Analisis</h2>
+  <a class="btn" href="data/rfm_segmen.csv" download>Tabel RFM + Segmen (.csv)</a>
+  <a class="btn o" href="data/aturan_apriori.csv" download>Aturan Apriori (.csv)</a></div>
+</section>
+</main>
+<footer><p>© 2026 Business Intelligence · Program Studi Teknologi Informasi</p><p>Universitas Timor · Kefamenanu</p></footer>
+<script>
+var CHARTS = [["c_trend", [{"type": "scatter", "mode": "lines+markers", "x": ["2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "y": [57278400.0, 56193175.0, 62168775.0, 51786325.0, 57068850.0, 56696750.0, 59270375.0, 57707800.0, 55299325.0, 65450875.0, 57126800.0, 62684075.0], "line": {"color": "#1E63C6", "width": 3}}], {"margin": {"l": 55, "r": 20, "t": 20, "b": 50}, "height": 330, "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)", "font": {"family": "Segoe UI, Arial, sans-serif", "size": 12, "color": "#0F172A"}, "yaxis": {"title": "Rp"}}], ["c_cat", [{"type": "pie", "labels": ["Bayi", "Sembako", "Rumah Tangga", "Minuman", "Makanan", "Perawatan", "Elektronik", "Protein", "ATK"], "values": [199303175.0, 149663100.0, 81996225.0, 75333500.0, 60665125.0, 42312350.0, 40847800.0, 35986350.0, 12623900.0], "hole": 0.45}], {"margin": {"l": 55, "r": 20, "t": 20, "b": 50}, "height": 330, "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)", "font": {"family": "Segoe UI, Arial, sans-serif", "size": 12, "color": "#0F172A"}, "legend": {"orientation": "h", "y": -0.25, "x": 0}}], ["c_top", [{"type": "bar", "orientation": "h", "x": [21493300.0, 21818500.0, 22542250.0, 22903650.0, 24602175.0, 27444200.0, 35986350.0, 73450200.0, 92589900.0, 104470600.0], "y": ["Minyak Goreng 1L", "Deterjen 1kg", "Sampo 170ml", "Gula Pasir 1kg", "Susu UHT 1L", "Lampu LED", "Telur Ayam 1kg", "Popok Bayi", "Beras Premium 5kg", "Susu Formula"], "marker": {"color": "#10B981"}}], {"margin": {"l": 140, "r": 20, "t": 20, "b": 50}, "height": 340, "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)", "font": {"family": "Segoe UI, Arial, sans-serif", "size": 12, "color": "#0F172A"}}], ["c_lift", [{"type": "bar", "orientation": "h", "x": [2.116348367872139, 2.129307007355788, 2.131739228513422, 2.1468748658203207, 2.156209052760777, 2.2500165442392963, 2.2966164270512093, 2.4311183144246353, 3.2040743513148597, 3.2049379785150456], "y": ["Pewangi Pakaian \u2192 Deterjen 1kg", "Sabun Mandi \u2192 Pasta Gigi", "Mi Instan \u2192 Air Mineral 600ml", "Minyak Goreng 1L \u2192 Gula Pasir 1kg", "Sabun Mandi \u2192 Sampo 170ml", "Pembersih Piring \u2192 Deterjen 1kg", "Popok Bayi \u2192 Susu Formula", "Mi Instan \u2192 Kopi Bubuk", "Minyak Goreng 1L \u2192 Beras Premium 5kg", "Pulpen \u2192 Buku Tulis"], "marker": {"color": "#F59E0B"}}], {"margin": {"l": 230, "r": 20, "t": 20, "b": 50}, "height": 360, "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)", "font": {"family": "Segoe UI, Arial, sans-serif", "size": 12, "color": "#0F172A"}, "xaxis": {"title": "Lift"}}], ["c_elbow", [{"type": "scatter", "mode": "lines+markers", "x": [2, 3, 4, 5, 6, 7, 8], "y": [2469.2910628971504, 1834.5598843414316, 1482.7643741159397, 1237.9387058152367, 1088.6989092633846, 953.985333709583, 883.9002151139504], "name": "Inertia", "line": {"color": "#1E63C6", "width": 3}}, {"type": "scatter", "mode": "markers", "x": [2], "y": [2469.2910628971504], "name": "k terpilih", "marker": {"size": 16, "color": "#F59E0B", "symbol": "star"}}], {"margin": {"l": 55, "r": 20, "t": 20, "b": 50}, "height": 330, "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)", "font": {"family": "Segoe UI, Arial, sans-serif", "size": 12, "color": "#0F172A"}, "legend": {"orientation": "h", "y": -0.25, "x": 0}, "xaxis": {"title": "Jumlah cluster (k)", "dtick": 1}, "yaxis": {"title": "Inertia / WCSS"}}], ["c_sil", [{"type": "bar", "x": [2, 3, 4, 5, 6, 7, 8], "y": [0.43425878927850314, 0.3211791184795819, 0.3365535162076711, 0.3086256435591249, 0.2833181097130038, 0.2884200364285635, 0.2773708683809853], "marker": {"color": ["#F59E0B", "#93C5FD", "#93C5FD", "#93C5FD", "#93C5FD", "#93C5FD", "#93C5FD"]}}], {"margin": {"l": 55, "r": 20, "t": 20, "b": 50}, "height": 330, "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)", "font": {"family": "Segoe UI, Arial, sans-serif", "size": 12, "color": "#0F172A"}, "xaxis": {"title": "Jumlah cluster (k)", "dtick": 1}, "yaxis": {"title": "Silhouette"}}], ["c_donut", [{"type": "pie", "labels": ["Bernilai Tinggi - Mulai Pasif (At Risk)", "Loyal / Champions"], "values": [413, 1067], "hole": 0.5, "marker": {"colors": ["#F59E0B", "#1E63C6"]}}], {"margin": {"l": 55, "r": 20, "t": 20, "b": 50}, "height": 340, "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)", "font": {"family": "Segoe UI, Arial, sans-serif", "size": 12, "color": "#0F172A"}, "legend": {"orientation": "h", "y": -0.25, "x": 0}}], ["c_contrib", [{"type": "bar", "x": ["Bernilai Tinggi - Mulai Pasif (At Risk)", "Loyal / Champions"], "y": [81464225.0, 617267300.0], "marker": {"color": ["#F59E0B", "#1E63C6"]}}], {"margin": {"l": 55, "r": 20, "t": 20, "b": 50}, "height": 340, "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)", "font": {"family": "Segoe UI, Arial, sans-serif", "size": 12, "color": "#0F172A"}, "yaxis": {"title": "Total Monetary (Rp)"}}], ["c_sc", [{"type": "scatter", "mode": "markers", "name": "Bernilai Tinggi - Mulai Pasif (At Risk)", "x": [2, 2, 3, 2, 2, 2, 3, 4, 2, 2, 2, 1, 1, 2, 3, 2, 1, 3, 2, 2, 1, 3, 1, 1, 2, 1, 2, 2, 2, 2, 4, 2, 2, 3, 4, 2, 2, 1, 3, 2, 3, 2, 2, 1, 2, 3, 2, 1, 1, 1, 1, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 2, 1, 3, 1, 2, 1, 3, 2, 2, 3, 4, 1, 4, 2, 2, 2, 3, 1, 1, 3, 2, 1, 3, 2, 1, 3, 3, 3, 2, 1, 2, 3, 2, 2, 2, 2, 3, 3, 5, 3, 2, 1, 2, 1, 1, 2, 2, 2, 2, 2, 2, 3, 2, 1, 2, 3, 3, 2, 2, 2, 2, 2, 4, 2, 3, 1, 1, 2, 2, 2, 1, 1, 2, 2, 3, 2, 3, 1, 2, 1, 2, 3, 2, 2, 2, 1, 3, 3, 2, 2, 2, 2, 3, 2, 3, 1, 3, 1, 3, 1, 4, 1, 1, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 3, 1, 2, 3, 3, 1, 2, 3, 2, 1, 2, 2, 1, 2, 3, 2, 3, 2, 1, 3, 1, 3, 2, 3, 1, 2, 2, 1, 3, 3, 3, 3, 2, 2, 3, 1, 2, 1, 3, 1, 1, 1, 1, 3, 3, 2, 1, 2, 3, 1, 1, 2, 1, 2, 3, 2, 2, 1, 2, 1, 2, 1, 2, 2, 3, 1, 1, 1, 2, 4, 1, 2, 1, 2, 2, 2, 3, 3, 2, 2, 3, 1, 2, 3, 1, 1, 3, 2, 3, 2, 2, 2, 1, 3, 1, 3, 3, 3, 4, 1, 1, 2, 2, 3, 1, 2, 2, 1, 3, 1, 2, 2, 2, 2, 2, 3, 1, 2, 2, 1, 2, 2, 1, 3, 3, 2, 2, 3, 3, 3, 2, 2, 1, 3, 3, 2, 3, 1, 3, 2, 1, 2, 2, 2, 3, 2, 3, 3, 1, 2, 2, 3, 2, 1, 3, 2, 3, 3, 3, 1, 4, 1, 2, 2, 1, 1, 2, 2, 3, 3, 1, 1, 3, 1, 2, 2, 3, 3, 4, 2, 2, 3, 2, 3, 1, 2, 3, 2, 2, 2, 2, 1, 3, 1, 2, 1, 2, 1, 2, 3, 3, 1, 2, 1, 2, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 3, 2, 1, 3, 1, 3, 1, 2, 4, 2, 1], "y": [186075.0, 57850.0, 101575.0, 178900.0, 425300.0, 361450.0, 251475.0, 376750.0, 229475.0, 217350.0, 129525.0, 57400.0, 256600.0, 289800.0, 183850.0, 342425.0, 26450.0, 243650.0, 101625.0, 127525.0, 104925.0, 302650.0, 16000.0, 87950.0, 65350.0, 238500.0, 145825.0, 279025.0, 130125.0, 447300.0, 359800.0, 413750.0, 184475.0, 93200.0, 241350.0, 154850.0, 154325.0, 48800.0, 194450.0, 453925.0, 197975.0, 243725.0, 119600.0, 129750.0, 252075.0, 221900.0, 104475.0, 32000.0, 32000.0, 3600.0, 208575.0, 158575.0, 86600.0, 119550.0, 27625.0, 470550.0, 226675.0, 134600.0, 571425.0, 65500.0, 326450.0, 126575.0, 94325.0, 112825.0, 35000.0, 201000.0, 206475.0, 428150.0, 368250.0, 182600.0, 209250.0, 109250.0, 170525.0, 141500.0, 173925.0, 330600.0, 174500.0, 418450.0, 429400.0, 329200.0, 282150.0, 253050.0, 233250.0, 156550.0, 98000.0, 22000.0, 157500.0, 249975.0, 273150.0, 38400.0, 343125.0, 63825.0, 46800.0, 202800.0, 358625.0, 148175.0, 164900.0, 39000.0, 323200.0, 172025.0, 408925.0, 197250.0, 279000.0, 234075.0, 145050.0, 196275.0, 363750.0, 397125.0, 141075.0, 92575.0, 164225.0, 90850.0, 31450.0, 368275.0, 168350.0, 313400.0, 211175.0, 94125.0, 154800.0, 466125.0, 496125.0, 244675.0, 237050.0, 136175.0, 172625.0, 265675.0, 131050.0, 319775.0, 577650.0, 141600.0, 234075.0, 170800.0, 462700.0, 200500.0, 70625.0, 140950.0, 304650.0, 62300.0, 142575.0, 51800.0, 212200.0, 208750.0, 334050.0, 182450.0, 226650.0, 38825.0, 124950.0, 90650.0, 428925.0, 276225.0, 57400.0, 242550.0, 65500.0, 92900.0, 156075.0, 225950.0, 422050.0, 150000.0, 179025.0, 307300.0, 385575.0, 193300.0, 456300.0, 87800.0, 398850.0, 99825.0, 143825.0, 74700.0, 162325.0, 49750.0, 74900.0, 162750.0, 163900.0, 129225.0, 596375.0, 229450.0, 127200.0, 228325.0, 172475.0, 313025.0, 91750.0, 10975.0, 195450.0, 156375.0, 115350.0, 232625.0, 160375.0, 200100.0, 112000.0, 47325.0, 175275.0, 169475.0, 90500.0, 202025.0, 63950.0, 139500.0, 220975.0, 210775.0, 68800.0, 227700.0, 324400.0, 174700.0, 458225.0, 68550.0, 105700.0, 133875.0, 280525.0, 51300.0, 109500.0, 144200.0, 336700.0, 200675.0, 374175.0, 367650.0, 189525.0, 122250.0, 230375.0, 355600.0, 398500.0, 177500.0, 250650.0, 271500.0, 42400.0, 96450.0, 77300.0, 120475.0, 180275.0, 381700.0, 227450.0, 81975.0, 212875.0, 209400.0, 106125.0, 27400.0, 204925.0, 70600.0, 214425.0, 80625.0, 78475.0, 145375.0, 129900.0, 334175.0, 78800.0, 291300.0, 50125.0, 360925.0, 127525.0, 300675.0, 115775.0, 36100.0, 69900.0, 270575.0, 145950.0, 75675.0, 116725.0, 82400.0, 150450.0, 187000.0, 72425.0, 918300.0, 94575.0, 272150.0, 114000.0, 162550.0, 107500.0, 239475.0, 278575.0, 172200.0, 45100.0, 325825.0, 126450.0, 201125.0, 234325.0, 321225.0, 246500.0, 16650.0, 355075.0, 55875.0, 223000.0, 296525.0, 178150.0, 453275.0, 82500.0, 198100.0, 205475.0, 89650.0, 358025.0, 119625.0, 51650.0, 73750.0, 138000.0, 127475.0, 28200.0, 123000.0, 245250.0, 312650.0, 98775.0, 224000.0, 317450.0, 105950.0, 210300.0, 145875.0, 148350.0, 72950.0, 497125.0, 120800.0, 374325.0, 131200.0, 185600.0, 196050.0, 156375.0, 324375.0, 145750.0, 120175.0, 160875.0, 303500.0, 213375.0, 383325.0, 79550.0, 146500.0, 102575.0, 333100.0, 74350.0, 41800.0, 215000.0, 285500.0, 166500.0, 157075.0, 228475.0, 293000.0, 188175.0, 121175.0, 230900.0, 179275.0, 315925.0, 43050.0, 109050.0, 238125.0, 122000.0, 128875.0, 113375.0, 512425.0, 17450.0, 224500.0, 64850.0, 123250.0, 264800.0, 31500.0, 116700.0, 70800.0, 225150.0, 114575.0, 331400.0, 64850.0, 67000.0, 252300.0, 23800.0, 215025.0, 465900.0, 85600.0, 442450.0, 190925.0, 193875.0, 193425.0, 372200.0, 176050.0, 187400.0, 60650.0, 491000.0, 251850.0, 517400.0, 89225.0, 262975.0, 37900.0, 56950.0, 201600.0, 99275.0, 242325.0, 45400.0, 228350.0, 50500.0, 449975.0, 198775.0, 217775.0, 117225.0, 104150.0, 24850.0, 210075.0, 123675.0, 127650.0, 201500.0, 218250.0, 212050.0, 518000.0, 796750.0, 285000.0, 102150.0, 175125.0, 408975.0, 61975.0, 85125.0, 168600.0, 238000.0, 199050.0, 92125.0, 201925.0, 38400.0, 492250.0, 151550.0, 53500.0, 341200.0, 190525.0, 64100.0], "text": ["C0002", "C0025", "C0029", "C0031", "C0032", "C0036", "C0046", "C0049", "C0052", "C0054", "C0056", "C0061", "C0066", "C0072", "C0074", "C0075", "C0076", "C0080", "C0093", "C0095", "C0101", "C0102", "C0104", "C0111", "C0112", "C0115", "C0117", "C0119", "C0128", "C0129", "C0135", "C0142", "C0148", "C0150", "C0151", "C0165", "C0167", "C0168", "C0173", "C0176", "C0177", "C0179", "C0182", "C0186", "C0188", "C0189", "C0190", "C0195", "C0196", "C0200", "C0204", "C0209", "C0214", "C0219", "C0223", "C0236", "C0237", "C0240", "C0241", "C0243", "C0244", "C0245", "C0246", "C0251", "C0258", "C0259", "C0260", "C0261", "C0266", "C0271", "C0276", "C0280", "C0283", "C0284", "C0291", "C0297", "C0300", "C0304", "C0305", "C0307", "C0309", "C0311", "C0318", "C0320", "C0322", "C0325", "C0328", "C0329", "C0331", "C0335", "C0337", "C0342", "C0343", "C0347", "C0348", "C0351", "C0353", "C0358", "C0362", "C0363", "C0365", "C0368", "C0369", "C0373", "C0380", "C0383", "C0386", "C0389", "C0392", "C0393", "C0401", "C0407", "C0408", "C0410", "C0413", "C0414", "C0425", "C0434", "C0435", "C0436", "C0438", "C0445", "C0448", "C0450", "C0453", "C0454", "C0455", "C0458", "C0459", "C0462", "C0466", "C0468", "C0472", "C0475", "C0477", "C0487", "C0488", "C0490", "C0500", "C0514", "C0516", "C0520", "C0526", "C0531", "C0533", "C0535", "C0536", "C0538", "C0539", "C0540", "C0542", "C0546", "C0548", "C0550", "C0557", "C0559", "C0563", "C0570", "C0584", "C0586", "C0587", "C0594", "C0596", "C0598", "C0600", "C0601", "C0604", "C0607", "C0615", "C0617", "C0618", "C0621", "C0629", "C0631", "C0633", "C0638", "C0639", "C0641", "C0643", "C0645", "C0646", "C0648", "C0649", "C0650", "C0660", "C0662", "C0665", "C0674", "C0676", "C0680", "C0682", "C0694", "C0698", "C0700", "C0702", "C0706", "C0708", "C0715", "C0716", "C0717", "C0721", "C0722", "C0727", "C0728", "C0731", "C0733", "C0735", "C0737", "C0738", "C0749", "C0752", "C0758", "C0760", "C0763", "C0764", "C0768", "C0771", "C0774", "C0776", "C0782", "C0784", "C0789", "C0791", "C0794", "C0798", "C0807", "C0810", "C0813", "C0820", "C0826", "C0831", "C0835", "C0844", "C0845", "C0847", "C0851", "C0853", "C0857", "C0863", "C0868", "C0876", "C0884", "C0885", "C0886", "C0891", "C0901", "C0903", "C0904", "C0905", "C0908", "C0910", "C0913", "C0916", "C0921", "C0924", "C0926", "C0927", "C0929", "C0931", "C0933", "C0940", "C0941", "C0942", "C0946", "C0950", "C0953", "C0954", "C0959", "C0964", "C0966", "C0981", "C0982", "C0983", "C0992", "C0996", "C0998", "C0999", "C1001", "C1012", "C1015", "C1018", "C1019", "C1020", "C1021", "C1023", "C1025", "C1028", "C1029", "C1033", "C1040", "C1047", "C1060", "C1061", "C1064", "C1070", "C1081", "C1082", "C1088", "C1090", "C1091", "C1094", "C1095", "C1096", "C1097", "C1105", "C1107", "C1110", "C1118", "C1122", "C1126", "C1127", "C1129", "C1139", "C1140", "C1141", "C1143", "C1149", "C1151", "C1156", "C1158", "C1162", "C1165", "C1166", "C1168", "C1169", "C1174", "C1178", "C1180", "C1184", "C1186", "C1187", "C1192", "C1194", "C1199", "C1202", "C1204", "C1205", "C1206", "C1207", "C1212", "C1225", "C1227", "C1230", "C1233", "C1241", "C1246", "C1247", "C1250", "C1261", "C1262", "C1264", "C1265", "C1269", "C1273", "C1274", "C1275", "C1286", "C1288", "C1292", "C1293", "C1296", "C1303", "C1307", "C1308", "C1309", "C1313", "C1318", "C1319", "C1320", "C1326", "C1331", "C1333", "C1334", "C1341", "C1342", "C1345", "C1347", "C1348", "C1352", "C1358", "C1362", "C1370", "C1371", "C1380", "C1381", "C1384", "C1388", "C1395", "C1403", "C1405", "C1417", "C1418", "C1419", "C1420", "C1425", "C1429", "C1431", "C1432", "C1440", "C1445", "C1447", "C1449", "C1451", "C1453", "C1460", "C1469", "C1470", "C1471", "C1473", "C1475", "C1488", "C1490", "C1493"], "marker": {"size": 6, "color": "#F59E0B", "opacity": 0.7}}, {"type": "scatter", "mode": "markers", "name": "Loyal / Champions", "x": [4, 5, 3, 6, 3, 4, 6, 5, 6, 4, 3, 5, 3, 5, 2, 5, 5, 3, 6, 5, 4, 6, 4, 4, 3, 5, 3, 5, 3, 3, 5, 2, 4, 6, 4, 6, 6, 3, 4, 6, 2, 3, 6, 5, 3, 7, 10, 6, 4, 3, 5, 5, 5, 5, 7, 5, 4, 5, 6, 3, 4, 4, 8, 5, 3, 7, 5, 5, 6, 6, 6, 6, 4, 7, 7, 5, 3, 4, 2, 3, 5, 6, 7, 6, 4, 3, 3, 4, 6, 4, 7, 2, 9, 4, 5, 6, 5, 4, 7, 9, 5, 9, 4, 4, 6, 7, 4, 6, 5, 3, 3, 4, 3, 4, 4, 4, 7, 5, 3, 3, 7, 4, 4, 4, 6, 8, 7, 4, 4, 4, 4, 4, 5, 6, 5, 3, 4, 5, 4, 7, 6, 5, 3, 7, 3, 3, 5, 6, 4, 6, 8, 3, 4, 4, 4, 7, 6, 8, 7, 4, 5, 8, 4, 3, 3, 4, 4, 7, 6, 5, 2, 5, 5, 3, 7, 6, 3, 4, 7, 4, 5, 4, 4, 4, 4, 6, 5, 4, 4, 5, 7, 5, 6, 3, 4, 5, 4, 4, 5, 5, 4, 4, 3, 3, 4, 3, 4, 4, 6, 3, 5, 6, 3, 7, 4, 3, 7, 4, 6, 5, 5, 10, 5, 4, 5, 4, 4, 5, 4, 4, 5, 5, 4, 5, 9, 5, 4, 7, 9, 6, 8, 3, 5, 6, 4, 3, 6, 6, 3, 3, 6, 2, 5, 4, 4, 9, 4, 3, 4, 6, 3, 4, 7, 2, 5, 7, 5, 5, 3, 3, 4, 5, 4, 5, 4, 5, 4, 3, 2, 5, 3, 3, 5, 5, 6, 5, 4, 5, 6, 4, 4, 6, 8, 4, 4, 8, 3, 5, 4, 6, 6, 3, 9, 3, 3, 7, 4, 5, 3, 5, 3, 4, 2, 4, 4, 5, 5, 5, 3, 4, 5, 7, 4, 3, 7, 4, 7, 4, 8, 4, 3, 5, 9, 4, 6, 6, 5, 8, 3, 3, 4, 5, 5, 3, 5, 5, 4, 3, 7, 5, 6, 4, 4, 3, 4, 6, 6, 3, 5, 8, 3, 4, 5, 5, 4, 8, 4, 5, 3, 6, 7, 6, 4, 4, 5, 2, 5, 3, 5, 4, 4, 3, 3, 6, 6, 3, 5, 3, 8, 8, 4, 6, 3, 5, 5, 2, 5, 4, 6, 6, 7, 4, 3, 3, 5, 3, 3, 8, 4, 7, 3, 3, 4, 5, 5, 4, 2, 5, 6, 9, 3, 3, 5, 4, 5, 3, 5, 7, 5, 6, 4, 3, 5, 3, 4, 8, 4, 3, 6, 6, 4, 5, 5, 7, 4, 4, 7, 5, 7, 4, 6, 4, 4, 3, 3, 4, 4, 3, 4, 4, 3, 5, 14, 5, 7, 3, 5, 4, 7, 5, 4, 8, 4, 6, 3, 5, 5, 4, 6, 4, 4, 4, 3, 6, 8, 5, 4, 4, 3, 6, 6, 5, 4, 6, 4, 6, 4, 4, 3, 5, 3, 6, 6, 6, 5, 3, 3, 6, 5, 8, 5, 4, 6, 5, 3, 5, 8, 8, 3, 4, 3, 5, 6, 4, 6, 6, 4, 3, 9, 4, 4, 3, 9, 6, 3, 5, 6, 3, 5, 6, 6, 7, 4, 7, 3, 5, 4, 5, 3, 2, 4, 5, 4, 5, 3, 4, 5, 4, 9, 3, 5, 4, 4, 3, 3, 5, 6, 6, 3, 3, 4, 6, 4, 3, 8, 4, 3, 4, 3, 5, 4, 6, 9, 2, 3, 4, 5, 5, 7, 4, 5, 4, 3, 6, 6, 5, 6, 4, 9, 4, 4, 4, 3, 5, 3, 4, 2, 3, 4, 2, 6, 3, 5, 10, 4, 4, 7, 9, 4, 6, 6, 5, 9, 4, 6, 4, 3, 8, 6, 6, 5, 4, 6, 4, 6, 5, 4, 6, 6, 7, 7, 5, 6, 5, 4, 5, 7, 5, 5, 5, 5, 7, 6, 5, 3, 5, 8, 6, 4, 7, 4, 2, 4, 5, 4, 4, 3, 5, 5, 5, 5, 4, 9, 3, 5, 7, 7, 6, 3, 4, 4, 5, 5, 4, 4, 7, 6, 4, 4, 5, 5, 3, 3, 3, 5, 4, 6, 6, 7, 3, 3, 7, 8, 6, 2, 8, 4, 4, 3, 5, 3, 6, 4, 4, 4, 5, 4, 4, 5, 4, 4, 3, 7, 5, 2, 4, 6, 6, 4, 6, 5, 5, 3, 6, 5, 5, 6, 6, 6, 5, 6, 5, 5, 3, 4, 3, 7, 5, 4, 4, 5, 5, 5, 3, 5, 4, 3, 8, 7, 4, 3, 4, 6, 4, 6, 5, 10, 4, 5, 3, 8, 7, 7, 5, 10, 5, 4, 3, 3, 6, 3, 4, 3, 4, 6, 4, 6, 6, 3, 7, 3, 3, 9, 6, 3, 4, 4, 2, 8, 3, 7, 5, 5, 7, 5, 7, 6, 5, 4, 4, 5, 8, 3, 3, 3, 7, 5, 3, 4, 2, 3, 3, 6, 3, 3, 7, 6, 5, 4, 3, 5, 4, 6, 5, 6, 7, 3, 7, 4, 3, 4, 7, 7, 6, 5, 4, 4, 4, 6, 5, 5, 4, 6, 5, 7, 6, 7, 5, 4, 6, 6, 4, 9, 5, 4, 3, 6, 5, 5, 6, 6, 5, 3, 3, 6, 3, 8, 4, 4, 6, 3, 8, 3, 4, 3, 5, 3, 3, 3, 8, 5, 3, 12, 5, 8, 5, 9, 2, 4, 4, 4, 4, 6, 5, 4, 3, 4, 9, 4, 5, 3, 5, 4, 7, 7, 4, 4, 4, 3, 4, 7, 8, 3, 12, 7, 5, 4, 5, 3, 4, 3, 5, 6, 4, 10, 3, 4, 5, 3, 6, 3, 6, 6, 6, 5, 3, 4, 4, 6, 4, 4, 7, 6, 4, 6, 3, 5, 3, 3, 4, 2, 5, 3, 3, 3, 5, 3, 3, 5, 9, 3, 7, 7, 3, 4, 4, 6, 4, 5, 3, 4, 3, 5, 5, 6, 5, 6, 7, 6, 4, 4, 5, 4, 5, 4, 7, 3, 3, 5, 4, 6, 3, 5, 3, 4, 3, 4, 12, 5, 9, 7, 5, 6, 9, 4, 4, 3, 3, 4, 6, 4, 5, 3, 9, 5, 7, 4, 4, 5, 5, 6, 4, 4, 6, 6, 4, 3, 3, 5, 6, 5, 5, 7, 6, 4, 4, 3, 4, 5, 4, 6, 5, 8, 3, 2, 3, 4, 4, 2, 3, 7, 4, 3, 5, 7, 4, 6], "y": [324125.0, 634200.0, 594550.0, 1215900.0, 310100.0, 482675.0, 401175.0, 206875.0, 650425.0, 497775.0, 488600.0, 774650.0, 243325.0, 328475.0, 333125.0, 494650.0, 269425.0, 366175.0, 912850.0, 1203850.0, 644050.0, 458375.0, 378450.0, 562650.0, 396950.0, 630275.0, 247525.0, 559900.0, 432975.0, 482350.0, 566300.0, 477400.0, 286000.0, 896250.0, 287550.0, 561250.0, 582525.0, 285275.0, 671650.0, 509325.0, 370675.0, 168650.0, 740625.0, 315725.0, 799000.0, 596600.0, 1149000.0, 849750.0, 513100.0, 496450.0, 583800.0, 516575.0, 424150.0, 512725.0, 843075.0, 201525.0, 220550.0, 393225.0, 822800.0, 332100.0, 465475.0, 735200.0, 876000.0, 417625.0, 343875.0, 775350.0, 596225.0, 469300.0, 781050.0, 837900.0, 477400.0, 816350.0, 204400.0, 676900.0, 1508475.0, 815725.0, 775875.0, 261075.0, 391950.0, 210725.0, 661300.0, 445100.0, 817150.0, 534125.0, 382975.0, 285550.0, 322375.0, 473000.0, 584975.0, 165275.0, 1102700.0, 328450.0, 1643300.0, 485350.0, 717550.0, 572925.0, 975100.0, 1138550.0, 497475.0, 906850.0, 567900.0, 665925.0, 714175.0, 603700.0, 472800.0, 715675.0, 567475.0, 411275.0, 330025.0, 525575.0, 394850.0, 402150.0, 818675.0, 262500.0, 537250.0, 215475.0, 354350.0, 319350.0, 542450.0, 261725.0, 393325.0, 414925.0, 361675.0, 530725.0, 835875.0, 646775.0, 963575.0, 434425.0, 437250.0, 573625.0, 1056575.0, 842425.0, 1055625.0, 720575.0, 790725.0, 643450.0, 277900.0, 290975.0, 641000.0, 1017275.0, 423675.0, 732200.0, 729650.0, 545400.0, 464150.0, 289000.0, 345550.0, 718575.0, 499250.0, 1288075.0, 915650.0, 468000.0, 274775.0, 370125.0, 383650.0, 896625.0, 507850.0, 669250.0, 974050.0, 230675.0, 335700.0, 1420475.0, 349400.0, 239200.0, 709075.0, 517475.0, 627725.0, 845850.0, 706325.0, 597650.0, 512000.0, 296500.0, 654550.0, 560625.0, 598275.0, 822450.0, 553400.0, 201950.0, 459025.0, 577550.0, 880225.0, 744850.0, 626625.0, 475150.0, 478300.0, 384775.0, 686750.0, 536525.0, 304850.0, 508650.0, 811525.0, 414500.0, 542300.0, 278025.0, 310200.0, 392675.0, 385525.0, 753475.0, 640275.0, 787300.0, 704875.0, 347275.0, 275750.0, 658625.0, 458775.0, 319100.0, 565050.0, 1134800.0, 780650.0, 440900.0, 417200.0, 824075.0, 207550.0, 740200.0, 747550.0, 245500.0, 565475.0, 267700.0, 201675.0, 791025.0, 357925.0, 789650.0, 827600.0, 643575.0, 585975.0, 484775.0, 611625.0, 484575.0, 431200.0, 517575.0, 327650.0, 529175.0, 632625.0, 384725.0, 973900.0, 683775.0, 510725.0, 1002775.0, 989100.0, 1158150.0, 1118700.0, 319400.0, 678025.0, 741850.0, 757825.0, 479125.0, 767100.0, 693700.0, 313650.0, 440475.0, 1496025.0, 439325.0, 412600.0, 406800.0, 319825.0, 1369000.0, 472600.0, 295800.0, 378575.0, 670350.0, 612150.0, 799200.0, 1054650.0, 504500.0, 235550.0, 1111525.0, 426150.0, 806450.0, 319200.0, 563350.0, 404050.0, 365950.0, 630300.0, 452200.0, 473775.0, 868400.0, 610850.0, 336000.0, 501100.0, 416675.0, 294650.0, 638625.0, 601100.0, 523150.0, 874950.0, 879650.0, 424450.0, 611650.0, 730525.0, 257150.0, 275300.0, 421825.0, 950525.0, 395525.0, 522200.0, 858025.0, 640600.0, 412150.0, 422250.0, 592150.0, 824300.0, 608750.0, 1425500.0, 624025.0, 551525.0, 844200.0, 347775.0, 397175.0, 597550.0, 299500.0, 183225.0, 507400.0, 543575.0, 196400.0, 376950.0, 550175.0, 568775.0, 750400.0, 530850.0, 530400.0, 352625.0, 1107000.0, 486700.0, 365300.0, 889625.0, 315375.0, 1143750.0, 338475.0, 1049325.0, 384850.0, 392950.0, 701050.0, 1225650.0, 429050.0, 629300.0, 314400.0, 372375.0, 736725.0, 250425.0, 236100.0, 345425.0, 383000.0, 297800.0, 189525.0, 1037850.0, 632325.0, 344775.0, 275900.0, 782225.0, 567225.0, 972650.0, 208050.0, 288100.0, 697875.0, 568350.0, 619425.0, 648500.0, 367450.0, 470625.0, 1384025.0, 279750.0, 335950.0, 402100.0, 271375.0, 276250.0, 946975.0, 256150.0, 547775.0, 336450.0, 781150.0, 414300.0, 477075.0, 582400.0, 620250.0, 587000.0, 424900.0, 429450.0, 221775.0, 335150.0, 397775.0, 206700.0, 234975.0, 819075.0, 1290150.0, 450475.0, 383325.0, 684100.0, 253800.0, 574575.0, 926650.0, 393150.0, 873225.0, 324050.0, 878500.0, 861975.0, 536025.0, 867000.0, 229325.0, 771500.0, 555675.0, 852450.0, 283025.0, 377000.0, 310200.0, 399525.0, 396975.0, 271900.0, 842750.0, 527200.0, 682950.0, 428500.0, 389275.0, 298375.0, 394000.0, 827100.0, 315550.0, 612400.0, 304400.0, 534525.0, 1187275.0, 497450.0, 197600.0, 792750.0, 266575.0, 592175.0, 563000.0, 695300.0, 1437225.0, 414675.0, 1290650.0, 562325.0, 543825.0, 596900.0, 825500.0, 552150.0, 778175.0, 382475.0, 231025.0, 653000.0, 433800.0, 363900.0, 773025.0, 456850.0, 633250.0, 262575.0, 443225.0, 1231850.0, 1345600.0, 926975.0, 547375.0, 929525.0, 362850.0, 425350.0, 683950.0, 234700.0, 779150.0, 870400.0, 342925.0, 470750.0, 275150.0, 300800.0, 659925.0, 1631175.0, 478725.0, 699575.0, 394125.0, 430300.0, 713050.0, 419300.0, 572625.0, 211100.0, 702625.0, 295100.0, 690625.0, 407575.0, 556400.0, 420175.0, 506375.0, 1004850.0, 280250.0, 295200.0, 524550.0, 292625.0, 579850.0, 715000.0, 427325.0, 738750.0, 838700.0, 290875.0, 801125.0, 862375.0, 655700.0, 722700.0, 435975.0, 581850.0, 708425.0, 315650.0, 455875.0, 403525.0, 636700.0, 248125.0, 570675.0, 857575.0, 859950.0, 693075.0, 543975.0, 321375.0, 857150.0, 695250.0, 804825.0, 358925.0, 299900.0, 702775.0, 486700.0, 270475.0, 477025.0, 834600.0, 691500.0, 426725.0, 282900.0, 237225.0, 372925.0, 720000.0, 254175.0, 391725.0, 631850.0, 425925.0, 287900.0, 1328525.0, 440950.0, 577800.0, 336700.0, 1261375.0, 787350.0, 294150.0, 368525.0, 629200.0, 399950.0, 849900.0, 484825.0, 609025.0, 810000.0, 563775.0, 1024975.0, 210600.0, 618775.0, 237675.0, 588775.0, 511500.0, 483650.0, 557550.0, 295850.0, 156750.0, 885500.0, 381925.0, 454350.0, 771525.0, 422550.0, 736950.0, 515000.0, 427400.0, 662000.0, 733925.0, 684650.0, 567850.0, 957400.0, 788850.0, 687525.0, 479150.0, 602700.0, 297975.0, 401300.0, 292075.0, 150100.0, 950025.0, 495200.0, 229100.0, 472950.0, 407375.0, 277625.0, 559700.0, 805825.0, 883600.0, 335325.0, 274300.0, 331425.0, 719125.0, 821900.0, 409750.0, 345300.0, 473425.0, 463975.0, 252425.0, 897150.0, 928650.0, 679325.0, 432925.0, 645350.0, 1819350.0, 533875.0, 763950.0, 538775.0, 971700.0, 369375.0, 487375.0, 570925.0, 366900.0, 732900.0, 225900.0, 519825.0, 1054250.0, 338125.0, 484825.0, 1462600.0, 567550.0, 500625.0, 825775.0, 1224075.0, 233775.0, 615275.0, 663750.0, 319900.0, 1503425.0, 386475.0, 542125.0, 548175.0, 415725.0, 538950.0, 504200.0, 630675.0, 1148500.0, 272250.0, 724000.0, 385675.0, 817075.0, 304075.0, 269875.0, 559175.0, 500600.0, 884500.0, 561250.0, 290925.0, 523600.0, 465825.0, 251500.0, 533600.0, 872725.0, 378300.0, 443950.0, 297500.0, 615475.0, 844150.0, 612825.0, 386475.0, 384325.0, 615975.0, 796900.0, 470800.0, 695275.0, 635875.0, 696750.0, 367475.0, 323000.0, 287275.0, 761450.0, 700150.0, 529850.0, 501125.0, 596775.0, 364500.0, 932125.0, 328025.0, 1586950.0, 888000.0, 411700.0, 978550.0, 545425.0, 583700.0, 328775.0, 355400.0, 324700.0, 969000.0, 1030675.0, 410825.0, 421050.0, 728450.0, 610775.0, 453700.0, 451650.0, 987725.0, 616575.0, 461300.0, 442675.0, 224450.0, 539100.0, 230425.0, 907175.0, 1328350.0, 653375.0, 204650.0, 495925.0, 1133000.0, 965150.0, 486125.0, 358900.0, 813450.0, 278325.0, 762650.0, 305525.0, 540150.0, 715500.0, 507925.0, 415900.0, 570450.0, 710150.0, 855900.0, 122575.0, 317600.0, 621450.0, 490500.0, 473600.0, 240675.0, 524050.0, 235675.0, 415325.0, 440600.0, 462100.0, 642975.0, 314125.0, 1001225.0, 246125.0, 460800.0, 250475.0, 442325.0, 458450.0, 717550.0, 1057825.0, 958450.0, 518700.0, 491075.0, 661775.0, 476350.0, 357875.0, 549450.0, 338400.0, 286550.0, 409800.0, 419375.0, 414900.0, 293950.0, 686850.0, 913550.0, 833375.0, 649550.0, 507800.0, 398550.0, 308850.0, 1024300.0, 767400.0, 475200.0, 210250.0, 614950.0, 439375.0, 697525.0, 530000.0, 416300.0, 2260450.0, 381800.0, 540725.0, 855825.0, 810700.0, 493275.0, 740725.0, 328300.0, 1281300.0, 782175.0, 353650.0, 427700.0, 303625.0, 348700.0, 379625.0, 288700.0, 187550.0, 475125.0, 1283775.0, 1156950.0, 318575.0, 614525.0, 198350.0, 703700.0, 211800.0, 738650.0, 782075.0, 949550.0, 268975.0, 311100.0, 1064150.0, 367450.0, 596175.0, 345850.0, 821775.0, 773125.0, 413775.0, 727075.0, 342200.0, 825000.0, 905875.0, 719725.0, 428075.0, 903150.0, 558350.0, 855050.0, 483150.0, 417700.0, 198050.0, 764850.0, 616850.0, 294525.0, 403275.0, 656850.0, 376575.0, 192625.0, 1078950.0, 370650.0, 229725.0, 1195225.0, 625225.0, 992925.0, 480375.0, 674150.0, 388200.0, 442375.0, 751175.0, 502100.0, 677850.0, 644875.0, 468775.0, 729350.0, 195200.0, 705675.0, 498125.0, 1719300.0, 499875.0, 978500.0, 907525.0, 442650.0, 554850.0, 399675.0, 558775.0, 864675.0, 1070750.0, 476425.0, 949825.0, 404350.0, 1156875.0, 782500.0, 1532025.0, 242850.0, 289575.0, 366050.0, 518400.0, 415900.0, 1458125.0, 562000.0, 461975.0, 742150.0, 827825.0, 369500.0, 396950.0, 742875.0, 292325.0, 586675.0, 772850.0, 669900.0, 1019250.0, 525200.0, 1017500.0, 532975.0, 475675.0, 734575.0, 468575.0, 921575.0, 639125.0, 401250.0, 267400.0, 407575.0, 535550.0, 523150.0, 401950.0, 841500.0, 556300.0, 267000.0, 1008350.0, 500225.0, 726500.0, 1117975.0, 1434650.0, 397150.0, 360925.0, 410850.0, 816500.0, 618750.0, 773350.0, 774175.0, 615975.0, 733875.0, 223800.0, 1077525.0, 555500.0, 375050.0, 235300.0, 926400.0, 863850.0, 819450.0, 722250.0, 736475.0, 616600.0, 389575.0, 431500.0, 483000.0, 990650.0, 1581950.0, 589700.0, 1101625.0, 743000.0, 615300.0, 215400.0, 1126425.0, 310125.0, 276325.0, 303475.0, 410025.0, 712975.0, 615925.0, 1105175.0, 283850.0, 799125.0, 571425.0, 441775.0, 519250.0, 339450.0, 725575.0, 477075.0, 966075.0, 421575.0, 335350.0, 474725.0, 243650.0, 794550.0, 653250.0, 171200.0, 1012500.0, 736200.0, 527700.0, 578300.0, 336800.0, 872850.0, 328750.0, 757100.0, 303350.0, 352600.0, 276675.0, 234150.0, 504425.0, 329075.0, 713100.0, 226675.0, 317350.0, 579350.0, 673975.0, 716675.0, 468775.0, 1015300.0, 230575.0, 567700.0, 283850.0, 310375.0, 488025.0, 627250.0, 374350.0, 426200.0, 219050.0, 322525.0, 279950.0, 499975.0, 560475.0, 1099575.0, 765650.0, 817025.0, 458075.0, 342475.0, 494875.0, 335725.0, 551350.0, 347750.0, 443825.0, 578900.0, 208075.0, 645125.0, 201025.0, 980850.0, 340650.0, 401875.0, 676650.0, 470275.0, 426650.0, 472150.0, 1451050.0, 167000.0, 794675.0, 390100.0, 472725.0, 825925.0, 1307475.0, 519225.0, 539100.0, 661025.0, 442625.0, 717100.0, 463550.0, 259775.0, 395100.0, 367225.0, 943650.0, 681925.0, 582700.0, 899950.0, 523275.0, 530925.0, 328825.0, 385875.0, 667500.0, 598725.0, 919975.0, 648025.0, 479150.0, 359875.0, 480300.0, 675125.0, 1005975.0, 883775.0, 323725.0, 427875.0, 836075.0, 548575.0, 396000.0, 622125.0, 749425.0, 563000.0, 389425.0, 339250.0, 566100.0, 1203925.0, 183375.0, 253975.0, 760500.0, 433850.0, 1050750.0, 252450.0, 495650.0, 931700.0, 575650.0, 209775.0, 591425.0, 653175.0, 261450.0, 570425.0], "text": ["C0001", "C0003", "C0004", "C0005", "C0006", "C0007", "C0008", "C0009", "C0010", "C0011", "C0012", "C0013", "C0014", "C0015", "C0017", "C0018", "C0019", "C0020", "C0021", "C0022", "C0023", "C0024", "C0026", "C0027", "C0028", "C0030", "C0033", "C0034", "C0035", "C0037", "C0038", "C0039", "C0040", "C0041", "C0042", "C0043", "C0044", "C0045", "C0047", "C0048", "C0050", "C0051", "C0053", "C0057", "C0058", "C0059", "C0060", "C0062", "C0063", "C0064", "C0065", "C0067", "C0068", "C0069", "C0070", "C0071", "C0073", "C0077", "C0078", "C0079", "C0081", "C0082", "C0083", "C0084", "C0085", "C0086", "C0087", "C0088", "C0089", "C0090", "C0091", "C0092", "C0094", "C0096", "C0097", "C0098", "C0099", "C0100", "C0103", "C0105", "C0106", "C0107", "C0108", "C0109", "C0110", "C0113", "C0114", "C0116", "C0118", "C0120", "C0121", "C0122", "C0123", "C0124", "C0125", "C0126", "C0127", "C0130", "C0131", "C0132", "C0133", "C0134", "C0136", "C0137", "C0138", "C0139", "C0140", "C0141", "C0143", "C0144", "C0145", "C0146", "C0147", "C0149", "C0152", "C0153", "C0154", "C0155", "C0156", "C0157", "C0158", "C0159", "C0160", "C0161", "C0162", "C0163", "C0164", "C0166", "C0169", "C0170", "C0171", "C0172", "C0174", "C0175", "C0178", "C0181", "C0183", "C0184", "C0185", "C0187", "C0191", "C0192", "C0193", "C0194", "C0197", "C0198", "C0199", "C0201", "C0202", "C0203", "C0205", "C0206", "C0207", "C0208", "C0210", "C0211", "C0212", "C0213", "C0215", "C0216", "C0217", "C0218", "C0220", "C0221", "C0222", "C0224", "C0225", "C0226", "C0227", "C0228", "C0229", "C0230", "C0231", "C0232", "C0233", "C0234", "C0235", "C0238", "C0239", "C0242", "C0247", "C0248", "C0249", "C0250", "C0252", "C0253", "C0254", "C0255", "C0256", "C0257", "C0262", "C0263", "C0264", "C0265", "C0267", "C0268", "C0270", "C0272", "C0273", "C0274", "C0275", "C0277", "C0278", "C0279", "C0281", "C0282", "C0285", "C0286", "C0287", "C0288", "C0289", "C0290", "C0292", "C0293", "C0294", "C0295", "C0296", "C0298", "C0299", "C0301", "C0302", "C0303", "C0306", "C0308", "C0310", "C0312", "C0313", "C0314", "C0315", "C0316", "C0317", "C0319", "C0321", "C0323", "C0324", "C0326", "C0327", "C0330", "C0332", "C0333", "C0334", "C0336", "C0338", "C0339", "C0340", "C0341", "C0344", "C0345", "C0346", "C0349", "C0350", "C0352", "C0354", "C0355", "C0356", "C0357", "C0359", "C0360", "C0361", "C0364", "C0366", "C0367", "C0370", "C0371", "C0372", "C0374", "C0375", "C0376", "C0377", "C0378", "C0379", "C0381", "C0382", "C0384", "C0385", "C0387", "C0388", "C0390", "C0391", "C0394", "C0395", "C0396", "C0397", "C0398", "C0399", "C0400", "C0402", "C0403", "C0404", "C0405", "C0406", "C0409", "C0411", "C0412", "C0415", "C0416", "C0417", "C0418", "C0419", "C0420", "C0421", "C0422", "C0423", "C0424", "C0426", "C0427", "C0428", "C0429", "C0430", "C0431", "C0432", "C0433", "C0437", "C0439", "C0440", "C0441", "C0442", "C0443", "C0444", "C0446", "C0447", "C0449", "C0451", "C0452", "C0456", "C0457", "C0460", "C0461", "C0463", "C0464", "C0465", "C0467", "C0469", "C0470", "C0471", "C0473", "C0474", "C0476", "C0478", "C0479", "C0480", "C0481", "C0482", "C0483", "C0484", "C0485", "C0489", "C0491", "C0492", "C0493", "C0494", "C0495", "C0496", "C0497", "C0498", "C0499", "C0501", "C0502", "C0503", "C0504", "C0505", "C0506", "C0507", "C0508", "C0509", "C0510", "C0511", "C0512", "C0513", "C0515", "C0517", "C0518", "C0519", "C0521", "C0522", "C0523", "C0524", "C0525", "C0527", "C0528", "C0529", "C0530", "C0532", "C0534", "C0537", "C0541", "C0543", "C0544", "C0545", "C0549", "C0551", "C0552", "C0553", "C0554", "C0555", "C0556", "C0558", "C0560", "C0561", "C0562", "C0564", "C0565", "C0566", "C0567", "C0568", "C0569", "C0571", "C0572", "C0573", "C0574", "C0576", "C0577", "C0578", "C0579", "C0580", "C0581", "C0582", "C0583", "C0585", "C0588", "C0589", "C0590", "C0591", "C0592", "C0593", "C0595", "C0597", "C0599", "C0603", "C0605", "C0606", "C0608", "C0609", "C0610", "C0611", "C0612", "C0613", "C0614", "C0616", "C0619", "C0620", "C0622", "C0623", "C0624", "C0625", "C0626", "C0627", "C0628", "C0630", "C0632", "C0634", "C0635", "C0636", "C0637", "C0640", "C0642", "C0644", "C0647", "C0651", "C0652", "C0653", "C0654", "C0655", "C0656", "C0657", "C0658", "C0659", "C0661", "C0663", "C0664", "C0666", "C0667", "C0668", "C0669", "C0670", "C0672", "C0673", "C0675", "C0677", "C0678", "C0679", "C0681", "C0683", "C0684", "C0685", "C0686", "C0687", "C0688", "C0689", "C0690", "C0691", "C0692", "C0695", "C0696", "C0697", "C0699", "C0701", "C0703", "C0704", "C0705", "C0707", "C0709", "C0710", "C0711", "C0712", "C0713", "C0714", "C0718", "C0719", "C0720", "C0723", "C0724", "C0725", "C0726", "C0729", "C0730", "C0732", "C0734", "C0736", "C0739", "C0740", "C0741", "C0742", "C0743", "C0744", "C0745", "C0746", "C0747", "C0748", "C0750", "C0751", "C0753", "C0754", "C0755", "C0756", "C0757", "C0759", "C0761", "C0762", "C0765", "C0766", "C0767", "C0769", "C0770", "C0773", "C0775", "C0777", "C0778", "C0779", "C0780", "C0781", "C0783", "C0785", "C0786", "C0787", "C0788", "C0790", "C0792", "C0793", "C0795", "C0796", "C0797", "C0800", "C0801", "C0802", "C0803", "C0805", "C0806", "C0808", "C0809", "C0811", "C0812", "C0814", "C0815", "C0816", "C0817", "C0818", "C0819", "C0821", "C0822", "C0823", "C0824", "C0825", "C0827", "C0828", "C0829", "C0830", "C0832", "C0833", "C0834", "C0836", "C0837", "C0838", "C0839", "C0840", "C0841", "C0842", "C0843", "C0846", "C0848", "C0849", "C0850", "C0852", "C0854", "C0856", "C0858", "C0859", "C0860", "C0861", "C0862", "C0864", "C0865", "C0866", "C0867", "C0869", "C0870", "C0871", "C0872", "C0873", "C0874", "C0875", "C0877", "C0878", "C0879", "C0880", "C0881", "C0882", "C0883", "C0887", "C0888", "C0889", "C0890", "C0892", "C0893", "C0894", "C0895", "C0896", "C0897", "C0898", "C0899", "C0900", "C0902", "C0906", "C0907", "C0909", "C0911", "C0912", "C0914", "C0915", "C0917", "C0918", "C0919", "C0920", "C0922", "C0923", "C0925", "C0928", "C0930", "C0932", "C0934", "C0935", "C0936", "C0937", "C0938", "C0939", "C0943", "C0944", "C0945", "C0947", "C0948", "C0949", "C0951", "C0952", "C0955", "C0956", "C0957", "C0958", "C0960", "C0961", "C0962", "C0963", "C0965", "C0967", "C0968", "C0969", "C0970", "C0971", "C0972", "C0973", "C0974", "C0975", "C0976", "C0977", "C0978", "C0979", "C0980", "C0984", "C0985", "C0986", "C0987", "C0988", "C0989", "C0990", "C0991", "C0993", "C0994", "C0995", "C1000", "C1002", "C1003", "C1004", "C1005", "C1006", "C1007", "C1008", "C1009", "C1010", "C1011", "C1013", "C1014", "C1016", "C1017", "C1022", "C1024", "C1026", "C1027", "C1030", "C1031", "C1032", "C1034", "C1035", "C1036", "C1037", "C1038", "C1039", "C1041", "C1042", "C1043", "C1044", "C1045", "C1046", "C1048", "C1049", "C1050", "C1051", "C1052", "C1053", "C1054", "C1055", "C1056", "C1057", "C1058", "C1059", "C1062", "C1063", "C1065", "C1066", "C1067", "C1068", "C1069", "C1071", "C1072", "C1073", "C1074", "C1075", "C1076", "C1077", "C1078", "C1079", "C1080", "C1083", "C1084", "C1085", "C1086", "C1087", "C1089", "C1092", "C1093", "C1098", "C1099", "C1100", "C1101", "C1102", "C1103", "C1106", "C1108", "C1109", "C1111", "C1112", "C1113", "C1114", "C1115", "C1116", "C1117", "C1119", "C1120", "C1121", "C1123", "C1124", "C1125", "C1128", "C1130", "C1131", "C1132", "C1133", "C1134", "C1135", "C1136", "C1137", "C1138", "C1142", "C1144", "C1145", "C1146", "C1147", "C1148", "C1150", "C1152", "C1153", "C1154", "C1155", "C1157", "C1159", "C1160", "C1161", "C1164", "C1167", "C1170", "C1171", "C1172", "C1173", "C1175", "C1176", "C1177", "C1181", "C1182", "C1183", "C1185", "C1188", "C1189", "C1190", "C1191", "C1193", "C1195", "C1196", "C1197", "C1198", "C1200", "C1201", "C1203", "C1208", "C1209", "C1210", "C1211", "C1213", "C1214", "C1215", "C1216", "C1217", "C1218", "C1219", "C1220", "C1221", "C1222", "C1223", "C1224", "C1226", "C1228", "C1229", "C1231", "C1232", "C1234", "C1235", "C1236", "C1237", "C1238", "C1239", "C1240", "C1242", "C1243", "C1244", "C1245", "C1248", "C1249", "C1251", "C1252", "C1253", "C1254", "C1255", "C1256", "C1257", "C1258", "C1259", "C1260", "C1263", "C1266", "C1267", "C1268", "C1270", "C1271", "C1272", "C1276", "C1277", "C1278", "C1279", "C1280", "C1281", "C1282", "C1283", "C1284", "C1285", "C1287", "C1289", "C1290", "C1291", "C1294", "C1295", "C1297", "C1298", "C1299", "C1300", "C1301", "C1302", "C1304", "C1305", "C1306", "C1310", "C1311", "C1312", "C1314", "C1315", "C1316", "C1317", "C1321", "C1322", "C1323", "C1324", "C1325", "C1327", "C1328", "C1329", "C1330", "C1332", "C1335", "C1336", "C1337", "C1338", "C1339", "C1340", "C1343", "C1344", "C1346", "C1349", "C1350", "C1351", "C1353", "C1354", "C1355", "C1356", "C1357", "C1359", "C1360", "C1361", "C1363", "C1364", "C1365", "C1366", "C1367", "C1368", "C1372", "C1373", "C1374", "C1375", "C1376", "C1377", "C1378", "C1379", "C1382", "C1383", "C1385", "C1386", "C1387", "C1389", "C1390", "C1391", "C1392", "C1393", "C1394", "C1396", "C1397", "C1398", "C1399", "C1400", "C1401", "C1402", "C1404", "C1406", "C1407", "C1408", "C1409", "C1410", "C1411", "C1412", "C1413", "C1414", "C1415", "C1416", "C1421", "C1422", "C1423", "C1424", "C1426", "C1427", "C1428", "C1430", "C1433", "C1434", "C1435", "C1436", "C1437", "C1438", "C1439", "C1441", "C1442", "C1443", "C1444", "C1446", "C1448", "C1450", "C1452", "C1454", "C1455", "C1456", "C1457", "C1458", "C1459", "C1462", "C1463", "C1464", "C1465", "C1466", "C1467", "C1468", "C1472", "C1474", "C1476", "C1477", "C1478", "C1479", "C1480", "C1481", "C1482", "C1483", "C1484", "C1485", "C1486", "C1487", "C1489", "C1491", "C1492", "C1494", "C1495", "C1496", "C1497", "C1498", "C1499", "C1500"], "marker": {"size": 6, "color": "#1E63C6", "opacity": 0.7}}], {"margin": {"l": 55, "r": 20, "t": 20, "b": 50}, "height": 400, "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)", "font": {"family": "Segoe UI, Arial, sans-serif", "size": 12, "color": "#0F172A"}, "legend": {"orientation": "h", "y": -0.25, "x": 0}, "xaxis": {"title": "Frequency (nota)"}, "yaxis": {"title": "Monetary (Rp)"}}]];
+CHARTS.forEach(function(c){Plotly.newPlot(c[0], c[1], c[2], {responsive:true, displaylogo:false});});
+document.querySelectorAll('table.sortable').forEach(function(t){
+  t.querySelectorAll('th').forEach(function(th,i){th.addEventListener('click',function(){
+    var rows=Array.from(t.tBodies[0].rows),asc=th.dataset.asc!=='1';
+    rows.sort(function(a,b){
+      var x=a.cells[i].innerText.replace(/\./g,'').replace(',','.').replace('%',''),y=b.cells[i].innerText.replace(/\./g,'').replace(',','.').replace('%','');
+      var nx=parseFloat(x),ny=parseFloat(y);
+      if(!isNaN(nx)&&!isNaN(ny))return asc?nx-ny:ny-nx;
+      return asc?x.localeCompare(y):y.localeCompare(x);});
+    rows.forEach(function(r){t.tBodies[0].appendChild(r)});th.dataset.asc=asc?'1':'0';});});});
+</script>
+</body></html>
